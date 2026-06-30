@@ -11,6 +11,7 @@ import CustomerDetail from "@/pages/customers/[id]";
 import MeterReadings from "@/pages/meter-readings";
 import Bills from "@/pages/bills";
 import Tariffs from "@/pages/tariffs";
+import SwingPreview from "@/pages/swing-preview";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/meter-readings" component={MeterReadings} />
       <Route path="/bills" component={Bills} />
       <Route path="/tariffs" component={Tariffs} />
+      <Route path="/swing" component={SwingPreview} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -34,9 +36,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Layout>
-            <Router />
-          </Layout>
+          <Switch>
+            {/* Swing preview renders full-screen without the admin layout */}
+            <Route path="/swing" component={SwingPreview} />
+            {/* All other routes use the admin layout */}
+            <Route>
+              <Layout>
+                <Router />
+              </Layout>
+            </Route>
+          </Switch>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
