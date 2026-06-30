@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "VoltGrid Admin"
+version = "1.0.0"
+id = "artifacts/voltgrid"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21707
+
+[services.development]
+run = "pnpm --filter @workspace/voltgrid run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/voltgrid", "run", "build" ]
+publicDir = "artifacts/voltgrid/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21707"
+BASE_PATH = "/"

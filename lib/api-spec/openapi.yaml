@@ -3,20 +3,30 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Electricity Billing Management API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: customers
+    description: Customer management
+  - name: tariffs
+    description: Tariff slab management
+  - name: meter-readings
+    description: Meter reading operations
+  - name: bills
+    description: Bill generation and management
+  - name: dashboard
+    description: Dashboard summary
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +34,319 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /customers:
+    get:
+      operationId: getCustomers
+      tags: [customers]
+      summary: List all customers
+      responses:
+        "200":
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      summary: Create a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerRequest"
+      responses:
+        "201":
+          description: Created customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    get:
+      operationId: getCustomer
+      tags: [customers]
+      summary: Get a customer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Not found
+    put:
+      operationId: updateCustomer
+      tags: [customers]
+      summary: Update a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerRequest"
+      responses:
+        "200":
+          description: Updated customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+    delete:
+      operationId: deleteCustomer
+      tags: [customers]
+      summary: Delete a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /tariffs:
+    get:
+      operationId: getTariffs
+      tags: [tariffs]
+      summary: List all tariffs
+      responses:
+        "200":
+          description: List of tariffs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tariff"
+    post:
+      operationId: createTariff
+      tags: [tariffs]
+      summary: Create a tariff slab
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTariffRequest"
+      responses:
+        "201":
+          description: Created tariff
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tariff"
+
+  /tariffs/{id}:
+    put:
+      operationId: updateTariff
+      tags: [tariffs]
+      summary: Update a tariff
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTariffRequest"
+      responses:
+        "200":
+          description: Updated tariff
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tariff"
+    delete:
+      operationId: deleteTariff
+      tags: [tariffs]
+      summary: Delete a tariff
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /meter-readings:
+    get:
+      operationId: getMeterReadings
+      tags: [meter-readings]
+      summary: List meter readings
+      parameters:
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of meter readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MeterReading"
+    post:
+      operationId: createMeterReading
+      tags: [meter-readings]
+      summary: Record a meter reading
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMeterReadingRequest"
+      responses:
+        "201":
+          description: Recorded reading
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterReading"
+
+  /meter-readings/{id}:
+    get:
+      operationId: getMeterReading
+      tags: [meter-readings]
+      summary: Get a meter reading
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Meter reading
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterReading"
+
+  /bills:
+    get:
+      operationId: getBills
+      tags: [bills]
+      summary: List all bills
+      parameters:
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, PAID, OVERDUE]
+      responses:
+        "200":
+          description: List of bills
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bill"
+    post:
+      operationId: generateBill
+      tags: [bills]
+      summary: Generate a bill for a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateBillRequest"
+      responses:
+        "201":
+          description: Generated bill
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bill"
+
+  /bills/{id}:
+    get:
+      operationId: getBill
+      tags: [bills]
+      summary: Get a bill by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Bill
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bill"
+    patch:
+      operationId: updateBillStatus
+      tags: [bills]
+      summary: Update bill payment status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBillStatusRequest"
+      responses:
+        "200":
+          description: Updated bill
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bill"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +357,264 @@ components:
       required:
         - status
 
+    DashboardSummary:
+      type: object
+      properties:
+        totalCustomers:
+          type: integer
+        pendingDues:
+          type: number
+        totalRevenue:
+          type: number
+        billsThisMonth:
+          type: integer
+        recentBills:
+          type: array
+          items:
+            $ref: "#/components/schemas/Bill"
+      required:
+        - totalCustomers
+        - pendingDues
+        - totalRevenue
+        - billsThisMonth
+        - recentBills
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        meterId:
+          type: string
+        connectionType:
+          type: string
+          enum: [RESIDENTIAL, COMMERCIAL, INDUSTRIAL]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - phone
+        - address
+        - meterId
+        - connectionType
+        - createdAt
+
+    CreateCustomerRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        meterId:
+          type: string
+        connectionType:
+          type: string
+          enum: [RESIDENTIAL, COMMERCIAL, INDUSTRIAL]
+      required:
+        - name
+        - email
+        - phone
+        - address
+        - meterId
+        - connectionType
+
+    Tariff:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        unitsFrom:
+          type: integer
+        unitsTo:
+          type: integer
+          nullable: true
+        ratePerUnit:
+          type: number
+        fixedCharge:
+          type: number
+        connectionType:
+          type: string
+          enum: [RESIDENTIAL, COMMERCIAL, INDUSTRIAL]
+      required:
+        - id
+        - name
+        - unitsFrom
+        - ratePerUnit
+        - fixedCharge
+        - connectionType
+
+    CreateTariffRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        unitsFrom:
+          type: integer
+        unitsTo:
+          type: integer
+          nullable: true
+        ratePerUnit:
+          type: number
+        fixedCharge:
+          type: number
+        connectionType:
+          type: string
+          enum: [RESIDENTIAL, COMMERCIAL, INDUSTRIAL]
+      required:
+        - name
+        - unitsFrom
+        - ratePerUnit
+        - fixedCharge
+        - connectionType
+
+    MeterReading:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        meterId:
+          type: string
+        previousReading:
+          type: number
+        currentReading:
+          type: number
+        unitsConsumed:
+          type: number
+        readingDate:
+          type: string
+          format: date
+        billingMonth:
+          type: string
+        billed:
+          type: boolean
+      required:
+        - id
+        - customerId
+        - customerName
+        - meterId
+        - previousReading
+        - currentReading
+        - unitsConsumed
+        - readingDate
+        - billingMonth
+        - billed
+
+    CreateMeterReadingRequest:
+      type: object
+      properties:
+        customerId:
+          type: integer
+        previousReading:
+          type: number
+        currentReading:
+          type: number
+        readingDate:
+          type: string
+          format: date
+        billingMonth:
+          type: string
+      required:
+        - customerId
+        - previousReading
+        - currentReading
+        - readingDate
+        - billingMonth
+
+    Bill:
+      type: object
+      properties:
+        id:
+          type: integer
+        billNumber:
+          type: string
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        meterId:
+          type: string
+        meterReadingId:
+          type: integer
+        unitsConsumed:
+          type: number
+        energyCharges:
+          type: number
+        fixedCharges:
+          type: number
+        taxAmount:
+          type: number
+        totalAmount:
+          type: number
+        billingMonth:
+          type: string
+        dueDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [PENDING, PAID, OVERDUE]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - billNumber
+        - customerId
+        - customerName
+        - meterId
+        - meterReadingId
+        - unitsConsumed
+        - energyCharges
+        - fixedCharges
+        - taxAmount
+        - totalAmount
+        - billingMonth
+        - dueDate
+        - status
+        - createdAt
+
+    GenerateBillRequest:
+      type: object
+      properties:
+        customerId:
+          type: integer
+        meterReadingId:
+          type: integer
+        dueDate:
+          type: string
+          format: date
+      required:
+        - customerId
+        - meterReadingId
+        - dueDate
+
+    UpdateBillStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [PENDING, PAID, OVERDUE]
+      required:
+        - status

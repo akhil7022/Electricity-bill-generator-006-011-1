@@ -47,3 +47,10 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Java / Maven
+java-backend/target/
+*.class
+
+# Logs
+/tmp/logs/
